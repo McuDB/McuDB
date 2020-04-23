@@ -5,6 +5,7 @@ from tomlkit import comment
 from tomlkit import document
 from tomlkit import nl
 from tomlkit import table
+from tomlkit import integer as toml_int
 from tomlkit.toml_file import TOMLFile
 from xml.etree.ElementTree import parse as parse_xml
 
@@ -44,13 +45,26 @@ doc.add(comment("THE SOFTWARE."))
 for xml_family in xml_root.findall("./Family"):
     family = table()
     family.add("name", xml_family.get("Name"))
+    family.add("type", "family")
     for xml_subfamily in xml_family.findall("./SubFamily"):
         subfamily = table()
         subfamily.add("name", xml_subfamily.get("Name"))
+        subfamily.add("type", "subfamily")
         for xml_mcu in xml_subfamily.findall("./Mcu"):
             mcu = table()
             mcu.add("name", xml_mcu.get("RefName"))
+            mcu.add("type", "mcu")
             mcu.add("package", xml_mcu.get("PackageName"))
+            if (xml_mcu.findtext("./Core")):
+                mcu.add("core", xml_mcu.findtext("./Core"))
+            if (xml_mcu.findtext("./Frequency")):
+                mcu.add("max_frequency", toml_int(xml_mcu.findtext("./Frequency")))
+            if (xml_mcu.findtext("./Ram")):
+                mcu.add("ram", toml_int(xml_mcu.findtext("./Ram")))
+            if (xml_mcu.findtext("./IONb")):
+                mcu.add("io_count", toml_int(xml_mcu.findtext("./IONb")))
+            if (xml_mcu.findtext("./Flash")):
+                mcu.add("flash", toml_int(xml_mcu.findtext("./Flash")))
             subfamily.add(xml_mcu.get("RefName"), mcu)
         family.add(xml_subfamily.get("Name"), subfamily)
     doc.add(xml_family.get("Name"), family)
